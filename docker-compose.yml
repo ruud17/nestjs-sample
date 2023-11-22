@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_DB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_DB_ROOT_PASSWORD}
+
+  node_app:
+    build: .
+    container_name: rest-service
+    volumes:
+      - .:/usr/src/app  # For Hot Reloading
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=mongodb://${MONGO_DB_ROOT_USERNAME}:${MONGO_DB_ROOT_PASSWORD}@mongodb:27017/${MONGO_DB_NAME}?authSource=admin
+    depends_on:
+      - mongodb
+
+volumes:
+  mongodata:
